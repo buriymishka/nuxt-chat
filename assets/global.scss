@@ -1,0 +1,54 @@
+a {
+  text-decoration: none;
+}
+
+html {
+  ::-webkit-scrollbar {
+    width: 0;
+  }
+}
+
+
+body {
+  overflow: hidden;
+}
+
+.oh {
+  overflow: hidden !important
+}
+
+.fade-enter-active {
+  animation: fadeIn .2s;
+}
+
+.fade-leave-active {
+  animation: fadeOut .2s;
+}
+
+.page-enter-active {
+  animation: fadeIn .2s;
+}
+
+.page-leave-active {
+  animation: fadeOut .2s;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+  }
+}

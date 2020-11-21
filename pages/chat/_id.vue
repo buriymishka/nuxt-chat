@@ -1,0 +1,132 @@
+<template>
+  <div class="main-wrap">
+    <transition name="fade" mode="out-in" v-on:beforeEnter="beforeEnter">
+      <AppLoader v-if="loading" />
+      <v-container
+        fluid
+        ref="block"
+        class="container"
+        v-else-if="$store.getters['user/user']"
+      >
+        <div class="messages-wrapper" ref="block">
+          <AppMessage
+            v-for="(message, i) in messagesInfo"
+            :key="i"
+            :content="message.content"
+            :ownerName="ownerName(message.ownerId)"
+            :isOwner="isOwner(message.ownerId)"
+          />
+        </div>
+      </v-container>
+    </transition>
+    <v-footer app height="72" inset class="flex-nowrap">
+      <v-text-field
+        background-color="grey lighten-2"
+        class="input"
+        dense
+        flat
+        hide-details
+        rounded
+        solo
+        v-model="mess"
+        @keypress.enter="sendMessage"
+      ></v-text-field>
+      <v-btn @click="sendMessage" large rounded color="success" class="ml-4">
+        <v-icon> mdi-send </v-icon>
+      </v-btn>
+    </v-footer>
+  </div>
+</template>
+
+<script>
+import AppMessage from "@/components/cabinet/message";
+import AppLoader from "@/components/loader";
+import { mapGetters } from "vuex";
+export default {
+  layout: "main",
+  components: {
+    AppMessage,
+    AppLoader,
+  },
+  data: () => ({
+    mess: "",
+    loading: true,
+  }),
+  computed: {
+    ...mapGetters("currentChat", {
+      usersInfo: "users",
+      messagesInfo: "messages",
+    }),
+    ownerName: function () {
+      return (ownerId) => {
+        return this.usersInfo.find((user) => user.id === ownerId).name;
+      };
+    },
+    isOwner: function () {
+      return (ownerId) => {
+        return this.$store.getters["user/user"].id === ownerId;
+      };
+    },
+  },
+  watch: {
+    messagesInfo() {
+      if (!this.loading) {
+        let block = this.$refs.block;
+        let difference =
+          block.scrollHeight - block.scrollTop - block.clientHeight;
+        this.$nextTick(() => {
+          if (difference < 200) {
+            block.scrollTop = block.scrollHeight;
+          }
+        });
+      }
+    },
+  },
+  methods: {
+    async sendMessage() {
+      let message = this.mess.trim();
+      if (message) {
+        let ownerId = this.$store.getters["user/user"].id;
+        let res = await this.$store.dispatch("currentChat/sendMessage", {
+          content: message,
+          ownerId,
+        });
+        if (res) {
+          this.mess = "";
+        }
+      }
+    },
+    beforeEnter() {
+      this.$nextTick(() => {
+        this.$refs.block.scrollTop = this.$refs.block.scrollHeight;
+      });
+    },
+  },
+  async mounted() {
+    await this.$store.dispatch("currentChat/loadChat", this.$route.params.id);
+    if (!this.$store.getters["user/user"]) {
+      await this.$store.dispatch("user/load");
+    }
+    this.loading = false;
+  },
+};
+</script>
+
+<style scoped>
+.input >>> .v-text-field__slot input {
+  color: #000000;
+}
+.container {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow-y: auto;
+}
+.main-wrap {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+</style>

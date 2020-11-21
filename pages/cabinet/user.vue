@@ -1,0 +1,142 @@
+<template>
+  <v-container>
+    <v-form
+      @submit.prevent="formHandler"
+      ref="form"
+      v-model="valid"
+      lazy-validation
+    >
+      <v-text-field
+        v-model="name"
+        :rules="nameRules"
+        name="name"
+        label="Name"
+        hint="At least 2 characters"
+        required
+      ></v-text-field>
+
+      <v-text-field
+        v-model="email"
+        :rules="emailRules"
+        name="email"
+        label="E-mail"
+        required
+      ></v-text-field>
+
+      <v-text-field
+        :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
+        :rules="oldPasswordRules"
+        :type="show2 ? 'text' : 'password'"
+        v-model="oldPassword"
+        label="Old Password"
+        hint="At least 2 characters"
+        class="input-group--focused"
+        @click:append="show2 = !show2"
+      ></v-text-field>
+
+      <v-text-field
+        :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
+        :rules="passwordRules"
+        :type="show3 ? 'text' : 'password'"
+        v-model="password"
+        label="Password"
+        hint="At least 2 characters"
+        class="input-group--focused"
+        @click:append="show3 = !show3"
+      ></v-text-field>
+
+      <v-text-field
+        :append-icon="show4 ? 'mdi-eye' : 'mdi-eye-off'"
+        :rules="[comparePasswords]"
+        :type="show4 ? 'text' : 'password'"
+        v-model="rePassword"
+        label="Re-enter Password"
+        hint="At least 2 characters"
+        class="input-group--focused"
+        @click:append="show4 = !show4"
+      ></v-text-field>
+
+      <v-img max-height="150" max-width="250" :src="userImage"></v-img>
+
+      <v-file-input ref="upload" @change="handleImageChange"> </v-file-input>
+
+      <v-btn
+        type="submit"
+        color="primary"
+        :loading="btnLoading"
+        class="mr-4 mt-4"
+        >Update</v-btn
+      >
+    </v-form>
+  </v-container>
+</template>
+<script>
+export default {
+  layout: "main",
+  async fetch({ store }) {
+    if (!store.getters["user/user"]) {
+      await store.dispatch("user/load");
+    }
+  },
+  data() {
+    return {
+      valid: true,
+      email: "",
+      emailRules: [(v) => /.+@.+\..+/.test(v) || "E-mail must be valid"],
+      name: "",
+      nameRules: [(v) => v.length >= 2 || "Min 2 characters"],
+      oldPassword: "",
+      show2: false,
+      oldPasswordRules: [
+        (v) => v.length >= 2 || !v.length || "Min 2 characters",
+      ],
+      password: "",
+      show3: false,
+      passwordRules: [(v) => v.length >= 2 || !v.length || "Min 2 characters"],
+      rePassword: "",
+      show4: false,
+      rePasswordRules: {},
+      userImage: "",
+      image: null,
+      btnLoading: false,
+    };
+  },
+  computed: {
+    comparePasswords() {
+      return () => this.password === this.rePassword || "Password must match";
+    },
+  },
+
+  methods: {
+    handleImageChange(file, fileList) {
+      this.image = file;
+    },
+    setupForm() {
+      let { name, email } = this.$store.getters["user/user"];
+      this.name = name;
+      this.email = email;
+      this.userImage = this.$store.getters["user/userImage"];
+    },
+    async formHandler() {
+      if (this.$refs.form.validate()) {
+        this.btnLoading = true;
+
+        const formData = {
+          name: this.name,
+          email: this.email,
+          image: this.image,
+          oldPassword: this.oldPassword,
+          newPassword: this.rePassword,
+        };
+
+        await this.$store.dispatch("user/update", formData);
+        this.setupForm();
+        this.btnLoading = false;
+      }
+    },
+  },
+  mounted() {
+    this.setupForm();
+  },
+};
+</script>
