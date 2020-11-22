@@ -4,6 +4,7 @@ export async function loadChat(id) {
   await new Promise(res => setTimeout(() => res(), 1000))    // REQUEST TO SERVER
   if (Math.random() < 0) throw new Error('Error on Loading chat')  // REQUEST TO SERVER
   let users = [
+    {id: '-1', name: ''},
     {id: 1, name: 'Pasha'},
     {id: 2, name: 'Zena1'},
     {id: 3, name: 'Leva'},
@@ -15,7 +16,7 @@ export async function loadChat(id) {
     { content: 'как дела', ownerId: 3 },
     { content: 'хорошо', ownerId: 4 },
     { content: 'что?', ownerId: 2 },
-    { content: 'Привет', ownerId: 2 },
+    { content: 'Olja has joined the chat', ownerId: "-1" },
     { content: 'Привет от меня', ownerId: 1 },
     { content: 'как дела', ownerId: 3 },
     { content: 'хорошо', ownerId: 4 },

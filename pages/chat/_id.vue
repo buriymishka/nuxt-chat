@@ -15,6 +15,7 @@
             :content="message.content"
             :ownerName="ownerName(message.ownerId)"
             :isOwner="isOwner(message.ownerId)"
+            :system="message.ownerId === '-1'"
           />
         </div>
       </v-container>

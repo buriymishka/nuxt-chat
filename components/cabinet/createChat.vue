@@ -16,11 +16,13 @@
       ></v-text-field>
 
       <v-text-field
-        v-model="password"
+        :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
         :rules="passwordRules"
-        name="password"
-        label="Chat password"
-        required
+        :type="show3 ? 'text' : 'password'"
+        v-model="password"
+        label="Password"
+        class="input-group--focused"
+        @click:append="show3 = !show3"
       ></v-text-field>
 
       <v-btn
@@ -46,6 +48,7 @@ export default {
     ],
 
     password: "",
+    show3: false,
     passwordRules: [
       (v) => !!v || "Chat password is required",
       (v) => v.length >= 2 || "Min 2 characters",
