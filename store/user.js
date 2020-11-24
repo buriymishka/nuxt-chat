@@ -80,9 +80,16 @@ export const actions = {
 
   async update({ commit, dispatch }, data) {    
     try {
-      let res = await userAPI.update(data)
+      let fd = new FormData()
+      fd.append('name', data.name)
+      fd.append('email', data.email)
+      if (data.image) { fd.append('image', data.image, data.image.name) }
+      fd.append('newPassword', data.newPassword)
+
+      let res = await userAPI.update(fd)
       commit('set', res)
       dispatch('alerts/add', { text: 'Successful update', color: 'green lighten-1' }, { root: true })
+      return true
     } catch (e) {
       dispatch('alerts/add', { text: e.message }, { root: true })
     }

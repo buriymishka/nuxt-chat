@@ -37,7 +37,10 @@
 </template>
 
 <script>
+import mixinParser from '@/mixins/parser'
+
 export default {
+  mixins: [mixinParser],
   data: () => ({
     valid: true,
 
@@ -59,21 +62,24 @@ export default {
   }),
   methods: {
     async formHandler() {
-      if (this.$refs.form.validate()) {
-        this.btnLoading = true;
+      this.title = this.MixinParser(this.title);
+      this.$nextTick(async () => {
+        if (this.$refs.form.validate()) {
+          this.btnLoading = true;
 
-        let res = await this.$store.dispatch('userChats/create', {
-          title: this.title,
-          password: this.password
-        })
-        if(res) {
-          this.title = ''
-          this.password = ''
+          let res = await this.$store.dispatch("userChats/create", {
+            title: this.title,
+            password: this.password,
+          });
+          if (res) {
+            this.title = "";
+            this.password = "";
+          }
+
+          this.btnLoading = false;
+          this.$refs.form.resetValidation();
         }
-
-        this.btnLoading = false;
-        this.$refs.form.resetValidation()
-      }
+      });
     },
   },
 };

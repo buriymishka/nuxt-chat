@@ -20,7 +20,7 @@ export const mutations = {
   remove(state, id) {
     state.recentChats = state.recentChats.filter(el => el.id !== id)
   },
-  
+
   clear(state) {
     state.recentChats = []
   }
@@ -46,11 +46,13 @@ export const actions = {
     }
   },
 
-  async add({ commit, dispatch }, data) {
+  async add({ commit, dispatch }, id) {
     try {
-      let res = await recentChatsAPI.add(data)
-      commit('add', res)
-    } catch(e) {
+      let res = await recentChatsAPI.add(id)
+      if (res.newRecentChat) {
+        commit('add', res)
+      }
+    } catch (e) {
       dispatch('alerts/add', { text: e.message }, { root: true })
     }
   },

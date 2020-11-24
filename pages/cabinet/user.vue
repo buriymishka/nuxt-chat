@@ -16,7 +16,7 @@
       ></v-text-field>
 
       <v-text-field
-        v-model="email"
+        v-model.trim="email"
         :rules="emailRules"
         name="email"
         label="E-mail"
@@ -24,22 +24,11 @@
       ></v-text-field>
 
       <v-text-field
-        :append-icon="show2 ? 'mdi-eye' : 'mdi-eye-off'"
-        :rules="oldPasswordRules"
-        :type="show2 ? 'text' : 'password'"
-        v-model="oldPassword"
-        label="Old Password"
-        hint="At least 2 characters"
-        class="input-group--focused"
-        @click:append="show2 = !show2"
-      ></v-text-field>
-
-      <v-text-field
         :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
         :rules="passwordRules"
         :type="show3 ? 'text' : 'password'"
         v-model="password"
-        label="Password"
+        label="New password"
         hint="At least 2 characters"
         class="input-group--focused"
         @click:append="show3 = !show3"
@@ -50,7 +39,7 @@
         :rules="[comparePasswords]"
         :type="show4 ? 'text' : 'password'"
         v-model="rePassword"
-        label="Re-enter Password"
+        label="Re-enter new password"
         hint="At least 2 characters"
         class="input-group--focused"
         @click:append="show4 = !show4"
@@ -71,9 +60,12 @@
   </v-container>
 </template>
 <script>
+import mixinParser from "@/mixins/parser";
 export default {
   layout: "main",
-  async fetch({ store }) {
+  mixins: [mixinParser],
+  fetchOnServer: false,
+  async fetch({ store, $axios }) {
     if (!store.getters["user/user"]) {
       await store.dispatch("user/load");
     }
@@ -82,17 +74,18 @@ export default {
     return {
       valid: true,
       email: "",
-      emailRules: [(v) => /.+@.+\..+/.test(v) || "E-mail must be valid"],
+      emailRules: [
+        (v) => /.+@.+\..+/.test(v) || "E-mail must be valid",
+        (v) => (v || "").indexOf(" ") < 0 || "No spaces are allowed",
+      ],
       name: "",
       nameRules: [(v) => v.length >= 2 || "Min 2 characters"],
-      oldPassword: "",
-      show2: false,
-      oldPasswordRules: [
-        (v) => v.length >= 2 || !v.length || "Min 2 characters",
-      ],
       password: "",
       show3: false,
-      passwordRules: [(v) => v.length >= 2 || !v.length || "Min 2 characters"],
+      passwordRules: [
+        (v) => v.length >= 2 || !v.length || "Min 2 characters",
+        (v) => (v || "").indexOf(" ") < 0 || "No spaces are allowed",
+      ],
       rePassword: "",
       show4: false,
       rePasswordRules: {},
@@ -118,21 +111,25 @@ export default {
       this.userImage = this.$store.getters["user/userImage"];
     },
     async formHandler() {
-      if (this.$refs.form.validate()) {
-        this.btnLoading = true;
+      this.name = this.MixinParser(this.name);
+      this.$nextTick(async () => {
+        if (this.$refs.form.validate()) {
+          this.btnLoading = true;
 
-        const formData = {
-          name: this.name,
-          email: this.email,
-          image: this.image,
-          oldPassword: this.oldPassword,
-          newPassword: this.rePassword,
-        };
+          const formData = {
+            name: this.name,
+            email: this.email,
+            image: this.image,
+            newPassword: this.password,
+          };
 
-        await this.$store.dispatch("user/update", formData);
-        this.setupForm();
-        this.btnLoading = false;
-      }
+          let res = await this.$store.dispatch("user/update", formData);
+          if (res) {
+            this.setupForm();
+          }
+          this.btnLoading = false;
+        }
+      });
     },
   },
   mounted() {

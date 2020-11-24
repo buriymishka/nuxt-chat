@@ -79,6 +79,7 @@ export const actions = {
       let chat = await chatsAPI.update(data)
       commit('update', chat)
       dispatch('alerts/add', { text: 'Chat has been successfully updated', color: 'green lighten-1' }, { root: true })
+      return true
     } catch (e) {
       dispatch('alerts/add', { text: e.message }, { root: true })
     }
@@ -98,7 +99,7 @@ export const actions = {
     try {
       let chat = await chatsAPI.join(data)
       dispatch('alerts/add', { text: 'You have joined to chat', color: 'green lighten-1' }, { root: true })
-      await dispatch('recentChats/add', chat, { root: true })
+      await dispatch('recentChats/add', chat.id, { root: true })
       this.$router.push(`/chat/${chat.id}`)
       return true
     } catch (e) {

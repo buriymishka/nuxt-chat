@@ -74,8 +74,10 @@
 </template>
 
 <script>
+import mixinParser from "@/mixins/parser";
 export default {
   layout: "empty",
+  mixins: [mixinParser],
   data: () => ({
     valid: true,
     email: "",
@@ -111,15 +113,18 @@ export default {
 
   methods: {
     async formHandler() {
-      if (this.$refs.form.validate()) {
-        this.btnLoading = true;
-        await this.$store.dispatch("user/signUp", {
-          name: this.name,
-          email: this.email,
-          password: this.password,
-        });
-        this.btnLoading = false;
-      }
+      this.name = this.MixinParser(this.name);
+      this.$nextTick(async () => {
+        if (this.$refs.form.validate()) {
+          this.btnLoading = true;
+          await this.$store.dispatch("user/signUp", {
+            name: this.name,
+            email: this.email,
+            password: this.password,
+          });
+          this.btnLoading = false;
+        }
+      });
     },
   },
 };

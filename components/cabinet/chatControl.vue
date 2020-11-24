@@ -9,7 +9,6 @@
     <div v-else>
       <h4>Title: {{ chatInfo.title }}</h4>
       <h4>Number: {{ chatInfo.id }}</h4>
-      <h4>Password: {{ chatInfo.password }}</h4>
       <v-form
         @submit.prevent="formHandler"
         ref="form"
@@ -25,11 +24,14 @@
         ></v-text-field>
 
         <v-text-field
-          v-model="password"
+          :append-icon="show3 ? 'mdi-eye' : 'mdi-eye-off'"
           :rules="passwordRules"
-          name="password"
+          :type="show3 ? 'text' : 'password'"
+          v-model="password"
           label="Chat password"
-          required
+          class="input-group--focused"
+          hint="At least 2 characters"
+          @click:append="show3 = !show3"
         ></v-text-field>
 
         <v-btn
@@ -46,8 +48,10 @@
 
 <script>
 import AppLoader from "@/components/loader";
+import mixinParser from "@/mixins/parser";
 
 export default {
+  mixins: [mixinParser],
   components: {
     AppLoader,
   },
@@ -66,9 +70,9 @@ export default {
     ],
 
     password: "",
+    show3: false,
     passwordRules: [
-      (v) => !!v || "Chat password is required",
-      (v) => v.length >= 2 || "Min 2 characters",
+      (v) => v.length >= 2 || !v.length || "Min 2 characters",
       (v) => (v || "").indexOf(" ") < 0 || "No spaces are allowed",
     ],
 
@@ -81,17 +85,23 @@ export default {
   },
   methods: {
     async formHandler() {
-      if (this.$refs.form.validate()) {
-        this.btnLoading = true;
+      this.title = this.MixinParser(this.title);
+      this.$nextTick(async () => {
+        if (this.$refs.form.validate()) {
+          this.btnLoading = true;
 
-        let res = await this.$store.dispatch("userChats/update", {
-          title: this.title,
-          password: this.password,
-          id: this.chatInfo.id,
-        });
+          let res = await this.$store.dispatch("userChats/update", {
+            title: this.title,
+            password: this.password,
+            id: this.chatInfo.id,
+          });
+          if (res) {
+            this.password = "";
+          }
 
-        this.btnLoading = false;
-      }
+          this.btnLoading = false;
+        }
+      });
     },
     closeHandler() {
       this.$store.dispatch("userChats/clearEditChat");
@@ -101,7 +111,6 @@ export default {
   async mounted() {
     await this.$store.dispatch("userChats/loadById", this.id);
     this.title = this.chatInfo.title;
-    this.password = this.chatInfo.password;
     this.loading = false;
   },
 };

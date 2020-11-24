@@ -20,7 +20,7 @@
           <v-list>
             <h3>Members</h3>
             <v-list-item-group color="primary">
-              <v-list-item v-for="user in users" :key="user.id">
+              <v-list-item v-for="user in users" :key="user.id" v-show="user.id !== MixinSystemId">
                 <v-list-item-content>
                   <v-list-item-title v-text="user.name"></v-list-item-title>
                 </v-list-item-content>
@@ -42,8 +42,10 @@
 
 <script>
 import { mapGetters } from "vuex";
+import systemMixin from '@/mixins/system'
 
 export default {
+  mixins: [systemMixin],
   data() {
     return {
       dialog: false,

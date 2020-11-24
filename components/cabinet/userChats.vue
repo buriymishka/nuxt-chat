@@ -2,32 +2,37 @@
   <v-list>
     <h3 class="ml-4 mb-4">Administrate your chats</h3>
     <AppLoader v-if="loading" />
-    <transition mode="out-in" name="edit">
-      <AppChatControl
-        @close="editTab = false"
-        v-if="editTab"
-        :id="editTabChatId"
-      />
-      <v-list-item-group color="primary" v-else>
-        <v-list-item
-          v-for="chat in userChats"
-          :key="chat.id"
-          @click="editHandler(chat.id)"
-        >
-          <v-list-item-content>
-            <v-list-item-title v-text="chat.title"></v-list-item-title>
-          </v-list-item-content>
-          <v-list-item-icon>
-            <v-icon class="icon-edit"> mdi-playlist-edit </v-icon>
-          </v-list-item-icon>
-          <v-list-item-icon>
-            <v-icon class="icon-trash" @click.stop="deleteHandler(chat.id)">
-              mdi-trash-can-outline
-            </v-icon>
-          </v-list-item-icon>
-        </v-list-item>
-      </v-list-item-group>
-    </transition>
+    <div v-else>
+      <div v-if="!userChats.length">
+        <h4 class="ml-4 mt-2">You do not have any chats yet</h4>
+      </div>
+      <transition mode="out-in" name="edit">
+        <AppChatControl
+          @close="editTab = false"
+          v-if="editTab"
+          :id="editTabChatId"
+        />
+        <v-list-item-group color="primary" v-else>
+          <v-list-item
+            v-for="chat in userChats"
+            :key="chat.id"
+            @click="editHandler(chat.id)"
+          >
+            <v-list-item-content>
+              <v-list-item-title v-text="chat.title"></v-list-item-title>
+            </v-list-item-content>
+            <v-list-item-icon>
+              <v-icon class="icon-edit"> mdi-playlist-edit </v-icon>
+            </v-list-item-icon>
+            <v-list-item-icon>
+              <v-icon class="icon-trash" @click.stop="deleteHandler(chat.id)">
+                mdi-trash-can-outline
+              </v-icon>
+            </v-list-item-icon>
+          </v-list-item>
+        </v-list-item-group>
+      </transition>
+    </div>
   </v-list>
 </template>
 
@@ -60,8 +65,8 @@ export default {
       }
     },
     async editHandler(id) {
-      this.editTab = true;
       this.editTabChatId = id;
+      this.editTab = true;
     },
   },
   async mounted() {

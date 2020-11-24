@@ -43,9 +43,11 @@ export const mutations = {
 
 export const actions = {
   async loadChat({ commit, dispatch }, id) {
+    dispatch('clear')
     try {
       let res = await currentChatAPI.loadChat(id)
       dispatch('setChat', res)
+      return true
     } catch (e) {
       dispatch('alerts/add', { text: e.message }, { root: true })
     }

@@ -15,7 +15,7 @@
             :content="message.content"
             :ownerName="ownerName(message.ownerId)"
             :isOwner="isOwner(message.ownerId)"
-            :system="message.ownerId === '-1'"
+            :system="message.ownerId === MixinSystemId"
           />
         </div>
       </v-container>
@@ -42,9 +42,12 @@
 <script>
 import AppMessage from "@/components/cabinet/message";
 import AppLoader from "@/components/loader";
+import systemMixin from '@/mixins/system'
+
 import { mapGetters } from "vuex";
 export default {
   layout: "main",
+  mixins: [systemMixin],
   components: {
     AppMessage,
     AppLoader,
@@ -87,10 +90,9 @@ export default {
     async sendMessage() {
       let message = this.mess.trim();
       if (message) {
-        let ownerId = this.$store.getters["user/user"].id;
         let res = await this.$store.dispatch("currentChat/sendMessage", {
           content: message,
-          ownerId,
+          chatId: this.$route.params.id
         });
         if (res) {
           this.mess = "";
@@ -104,11 +106,13 @@ export default {
     },
   },
   async mounted() {
-    await this.$store.dispatch("currentChat/loadChat", this.$route.params.id);
     if (!this.$store.getters["user/user"]) {
       await this.$store.dispatch("user/load");
     }
-    this.loading = false;
+    let res = await this.$store.dispatch("currentChat/loadChat", this.$route.params.id);
+    if(res) {
+      this.loading = false;
+    }
   },
 };
 </script>

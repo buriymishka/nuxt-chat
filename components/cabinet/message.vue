@@ -46,7 +46,7 @@ export default {
     text-align: center
     color: #ffffff
     .message__title
-      color: #ffffff
+      display: none
     .message__content
       margin-top: 20px
 </style>
