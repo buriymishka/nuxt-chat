@@ -51,7 +51,7 @@ export default {
     }
   },
   mounted() {
-    if (!this.$store.getters["user/user"]) {
+    if (!this.$store.getters["user/user"] && (this.$route.name !== 'cabinet-user')) {
       this.$store.dispatch("user/load")
     }
   }

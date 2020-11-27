@@ -28,6 +28,7 @@
         flat
         hide-details
         rounded
+        autofocus
         solo
         v-model="mess"
         @keypress.enter="sendMessage"
@@ -47,6 +48,7 @@ import systemMixin from '@/mixins/system'
 import { mapGetters } from "vuex";
 export default {
   layout: "main",
+  middleware: ['auth'],
   mixins: [systemMixin],
   components: {
     AppMessage,

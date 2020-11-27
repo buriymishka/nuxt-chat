@@ -77,6 +77,7 @@
 import mixinParser from "@/mixins/parser";
 export default {
   layout: "empty",
+  middleware: ['notAuth'],
   mixins: [mixinParser],
   data: () => ({
     valid: true,

@@ -34,7 +34,7 @@ export const mutations = {
     state.id = id
   },
   clear(state) {
-    state.message = []
+    state.messages = []
     state.users = []
     state.title = null
     state.id = null

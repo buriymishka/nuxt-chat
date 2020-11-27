@@ -63,13 +63,8 @@
 import mixinParser from "@/mixins/parser";
 export default {
   layout: "main",
+  middleware: ["auth"],
   mixins: [mixinParser],
-  fetchOnServer: false,
-  async fetch({ store, $axios }) {
-    if (!store.getters["user/user"]) {
-      await store.dispatch("user/load");
-    }
-  },
   data() {
     return {
       valid: true,
@@ -132,7 +127,10 @@ export default {
       });
     },
   },
-  mounted() {
+  async mounted() {
+    if (!this.$store.getters["user/user"]) {
+      await this.$store.dispatch("user/load");
+    }
     this.setupForm();
   },
 };

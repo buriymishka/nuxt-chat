@@ -37,14 +37,13 @@
         </v-card-text>
       </v-card>
     </v-flex>
-
   </v-layout>
 </template>
 
 <script>
 export default {
-
   layout: "empty",
+  middleware: ["notAuth"],
   data: () => ({
     valid: true,
     email: "",

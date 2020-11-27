@@ -23,3 +23,7 @@ export async function load() {
 export async function update(data) {
   return await server.post('user/update', data)
 }
+
+export async function autoLogin(data) {
+  return await server.post('tokens/autoLogin', data)
+}
