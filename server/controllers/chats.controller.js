@@ -1,12 +1,12 @@
 const bcrypt = require('bcrypt');
-const ACParser = require('../utils/accessTokenParser')
+const { getAccessTokenPayload } = require('../utils/tokens')
 const { createPassword } = require('../utils/functions')
 const keys = require("../keys/index")
 const Chat = require('../models/chats.model');
 const User = require('../models/user.model');
 
 module.exports.create = async (req, res) => {
-  const token = ACParser.parse(req.headers.access_token)
+  const token = getAccessTokenPayload(req.headers.access_token)
 
   try {
     const chat = new Chat({
@@ -25,7 +25,7 @@ module.exports.create = async (req, res) => {
 }
 
 module.exports.getAll = async (req, res) => {
-  const token = ACParser.parse(req.headers.access_token)
+  const token = getAccessTokenPayload(req.headers.access_token)
 
   try {
     let chats = await Chat.find({ ownerId: token.userId }).select(['title'])
@@ -86,7 +86,7 @@ module.exports.update = async (req, res) => {
 }
 
 module.exports.join = async (req, res) => {
-  const token = ACParser.parse(req.headers.access_token)
+  const token = getAccessTokenPayload(req.headers.access_token)
 
   if (!req.body.number.match(/^[0-9a-fA-F]{24}$/)) {
     res.status(404).json({ message: 'Wrong number or password' })
@@ -129,6 +129,8 @@ module.exports.join = async (req, res) => {
 
 module.exports.loadCurrentById = async (req, res) => {
 
+  const token = getAccessTokenPayload(req.headers.access_token)
+
   if (!req.params.id.match(/^[0-9a-fA-F]{24}$/)) {
     res.status(404).json({ message: 'Not found' })
     return
@@ -136,6 +138,12 @@ module.exports.loadCurrentById = async (req, res) => {
 
   try {
     const chat = await Chat.findById(req.params.id)
+    
+    if(!chat.users.some(user => user._id == token.userId)) {
+      res.status(404).json({ message: 'Not found' })
+      return
+    }
+
     if (chat) {
 
       let fullUsers = await User.find({
@@ -165,7 +173,7 @@ module.exports.loadCurrentById = async (req, res) => {
 }
 
 module.exports.sendMessage = async (req, res) => {
-  const token = ACParser.parse(req.headers.access_token)
+  const token = getAccessTokenPayload(req.headers.access_token)
 
   if (!req.body.chatId.match(/^[0-9a-fA-F]{24}$/) || !req.body.content) {
     res.status(404).json({ message: 'How did you do that???' })

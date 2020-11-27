@@ -56,7 +56,7 @@
 <script>
 export default {
   layout: "empty",
-
+  middleware: ['notAuth'],
   data: () => ({
     valid: true,
     email: "",

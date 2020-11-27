@@ -1,13 +1,14 @@
 const bcrypt = require('bcrypt');
 const nodemailer = require("nodemailer");
-const ACParser = require('../utils/accessTokenParser')
+const { getAccessTokenPayload } = require('../utils/tokens')
 const { createPassword, generatePassword, sendMail } = require('../utils/functions')
+const { generateRefreshToken, generateAccessToken } = require('../utils/tokens')
 const User = require('../models/user.model')
 const Chat = require('../models/chats.model');
+const Token = require('../models/tokens.model');
 
 module.exports.load = async (req, res) => {
-  const token = ACParser.parse(req.headers.access_token)
-
+  const token = getAccessTokenPayload(req.headers.access_token)
   try {
     const user = await User.findById(token.userId)
     res.json({
@@ -43,11 +44,22 @@ module.exports.signUp = async (req, res) => {
     })
     await user.save()
 
+    const generatedRefreshToken = generateRefreshToken()
+    const token = new Token({
+      refreshToken: generatedRefreshToken,
+      userId: user._id,
+      expires: Date.now() + (1000 * 60 * 60 * 24 * 30)
+    })
+    await token.save()
+    res.cookie('refreshToken', generatedRefreshToken, { maxAge: 2592000000, httpOnly: true });
+    const generatedAccessToken = generateAccessToken({ userId: user._id })
+    
     res.json({
       name: user.name,
       email: user.email,
       image: user.image,
-      id: user._id
+      id: user._id,
+      accessToken: generatedAccessToken
     })
   } catch (e) {
     res.status(500).json(e)
@@ -61,11 +73,23 @@ module.exports.signIn = async (req, res) => {
     if (candidate) {
       let isPassCorrect = await bcrypt.compare(req.body.password, candidate.password)
       if (isPassCorrect) {
+
+        const generatedRefreshToken = generateRefreshToken()
+        const token = new Token({
+          refreshToken: generatedRefreshToken,
+          userId: candidate._id,
+          expires: Date.now() + (1000 * 60 * 60 * 24 * 30)
+        })
+        await token.save()
+        res.cookie('refreshToken', generatedRefreshToken, { maxAge: 2592000000, httpOnly: true });
+        const generatedAccessToken = generateAccessToken({ userId: candidate._id })
+
         res.json({
           name: candidate.name,
           email: candidate.email,
           image: candidate.image,
-          id: candidate._id
+          id: candidate._id,
+          accessToken: generatedAccessToken
         })
       } else {
         res.status(404).json({ message: 'Wrong email or password' })
@@ -80,7 +104,15 @@ module.exports.signIn = async (req, res) => {
 }
 
 module.exports.logout = async (req, res) => {
-  res.json({ res: true })
+
+  try {
+    res.clearCookie('refreshToken')
+    const token = await Token.findOneAndRemove({ refreshToken: req.cookies.refreshToken })
+    res.json({ res: true })
+  } catch (e) {
+    res.status(500).json(e)
+  }
+
 }
 
 module.exports.recover = async (req, res) => {
@@ -102,12 +134,12 @@ module.exports.recover = async (req, res) => {
 }
 
 module.exports.update = async (req, res) => {
-  const token = ACParser.parse(req.headers.access_token)
+  const token = getAccessTokenPayload(req.headers.access_token)
 
   try {
     let candidate = await User.findOne({ email: req.body.email })
     if (candidate) {
-      if (candidate._id != token.userId){
+      if (candidate._id != token.userId) {
         res.status(409).json({ message: 'email already exists' })
         return;
       }
@@ -135,14 +167,13 @@ module.exports.update = async (req, res) => {
       id: user._id
     })
   } catch (e) {
-    console.log(e)
     res.status(500).json(e)
   }
 
 }
 
 module.exports.loadRecentChats = async (req, res) => {
-  const token = ACParser.parse(req.headers.access_token)
+  const token = getAccessTokenPayload(req.headers.access_token)
 
   try {
     let { recentChats: userRecentChatsIds } = await User.findById(token.userId).select('recentChats')
@@ -161,7 +192,7 @@ module.exports.loadRecentChats = async (req, res) => {
 }
 
 module.exports.addRecentChat = async (req, res) => {
-  const token = ACParser.parse(req.headers.access_token)
+  const token = getAccessTokenPayload(req.headers.access_token)
 
   try {
     const user = await User.findById(token.userId)
@@ -183,7 +214,7 @@ module.exports.addRecentChat = async (req, res) => {
 }
 
 module.exports.removeRecentChat = async (req, res) => {
-  const token = ACParser.parse(req.headers.access_token)
+  const token = getAccessTokenPayload(req.headers.access_token)
 
   try {
     let user = await User.findById(token.userId)

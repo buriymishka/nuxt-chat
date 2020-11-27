@@ -1,7 +1,9 @@
+import { setAC, clearAC } from '@/tokens/index'
 import * as userAPI from '@/api/user'
 
 export const state = () => ({
   user: null,
+  isAuthenticated: false
 })
 
 export const getters = {
@@ -12,6 +14,7 @@ export const getters = {
     }
     return 'https://cdn.vuetifyjs.com/images/john.jpg'
   },
+  isAuthenticated: state => state.isAuthenticated
 }
 
 export const mutations = {
@@ -20,6 +23,9 @@ export const mutations = {
   },
   clear(state) {
     state.user = null
+  },
+  setIsAuthenticated(state, payload) {
+    state.isAuthenticated = payload
   }
 }
 
@@ -27,6 +33,9 @@ export const actions = {
   async login({ commit, dispatch }, data) {
     try {
       let res = await userAPI.login(data)
+      commit('setIsAuthenticated', true)
+      setAC(res.accessToken)
+      delete res.accessToken
       commit('set', res)
       this.$router.push('/cabinet')
       dispatch('alerts/add', { text: 'Successful sign in', color: 'green lighten-1' }, { root: true })
@@ -38,6 +47,9 @@ export const actions = {
   async signUp({ commit, dispatch }, data) {
     try {
       let res = await userAPI.signUp(data)
+      commit('setIsAuthenticated', true)
+      setAC(res.accessToken)
+      delete res.accessToken
       commit('set', res)
       this.$router.push('/cabinet')
       dispatch('alerts/add', { text: 'Successful registration', color: 'green lighten-1' }, { root: true })
@@ -60,6 +72,8 @@ export const actions = {
       await userAPI.logout()
       this.$router.push('/')
       commit('clear')
+      clearAC()
+      commit('setIsAuthenticated', false)
       dispatch('recentChats/clear', null, { root: true })
       dispatch('userChats/clear', null, { root: true })
       dispatch('currentChat/clear', null, { root: true })
@@ -78,7 +92,7 @@ export const actions = {
     }
   },
 
-  async update({ commit, dispatch }, data) {    
+  async update({ commit, dispatch }, data) {
     try {
       let fd = new FormData()
       fd.append('name', data.name)
@@ -94,5 +108,18 @@ export const actions = {
       dispatch('alerts/add', { text: e.message }, { root: true })
     }
   },
+
+  async autoLogin({ commit }, data) {
+    try {
+      let res = await userAPI.autoLogin({ data })
+      if (res.res) {
+        commit('setIsAuthenticated', true)
+      }
+      return res
+    } catch (e) {
+      this.$router.push('/')
+    }
+
+  }
 
 }
