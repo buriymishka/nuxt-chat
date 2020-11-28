@@ -98,20 +98,31 @@ module.exports.join = async (req, res) => {
     if (candidate) {
       let isPassCorrect = await bcrypt.compare(req.body.password, candidate.password)
       if (isPassCorrect) {
+        let newUserMessage = null
+        let newUser = null
         if (!candidate.users.some(user => user._id == token.userId)) {
           candidate.users.push(token.userId)
-          let { name:userName } = await User.findById(token.userId).select('name')
-          candidate.messages.push({
+          newUser = await User.findById(token.userId).select('name')
+          newUserMessage = {
             ownerId: keys.systemId,
-            content: `${userName} joined`
-          })
+            content: `${newUser.name} joined`
+          }
+          candidate.messages.push(newUserMessage)
           await candidate.save()
         }
 
-        res.json({
-          id: candidate._id,
-          title: candidate.title
-        })
+        let resObj = { id: candidate._id }
+        if (newUserMessage) {
+          resObj.newUserMessage = newUserMessage
+        }
+        if (newUser) {
+          resObj.newUser = {
+            name: newUser.name,
+            id: newUser._id
+          }
+        }
+
+        res.json(resObj)
         return
       } else {
         res.status(404).json({ message: 'Wrong number or password' })
@@ -138,13 +149,13 @@ module.exports.loadCurrentById = async (req, res) => {
 
   try {
     const chat = await Chat.findById(req.params.id)
-    
-    if(!chat.users.some(user => user._id == token.userId)) {
-      res.status(404).json({ message: 'Not found' })
-      return
-    }
+
 
     if (chat) {
+      if (!chat.users.some(user => user._id == token.userId)) {
+        res.status(404).json({ message: 'Chat not found' })
+        return
+      }
 
       let fullUsers = await User.find({
         '_id': {
@@ -156,14 +167,15 @@ module.exports.loadCurrentById = async (req, res) => {
         name: user.name
       }))
 
+      let messages = chat.messages.slice(Math.max(chat.messages.length - 200, 0))
       res.json({
         title: chat.title,
         id: chat._id,
         users: fullUsers,
-        messages: chat.messages
+        messages
       })
     } else {
-      res.status(404).json({ message: 'Not found' })
+      res.status(404).json({ message: 'Chat not found' })
       return
     }
   } catch (e) {

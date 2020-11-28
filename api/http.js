@@ -10,13 +10,11 @@ const instance = axios.create({
 instance.interceptors.request.use(addAccessToken);
 
 instance.interceptors.request.use(request => {
-  console.log('MAKING REQUEST')
   request.headers.access_token = getAC()
   return request
 })
 
 instance.interceptors.response.use(response => {
-  console.log('PARSING RESPONSE')
   return response.data
 }, async (error) => {
   if(error.response.status === 401){

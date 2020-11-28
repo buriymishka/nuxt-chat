@@ -43,21 +43,24 @@
 <script>
 import AppMessage from "@/components/cabinet/message";
 import AppLoader from "@/components/loader";
-import systemMixin from '@/mixins/system'
+import systemMixin from "@/mixins/system";
 
 import { mapGetters } from "vuex";
 export default {
   layout: "main",
-  middleware: ['auth'],
+  middleware: ["auth"],
   mixins: [systemMixin],
   components: {
     AppMessage,
     AppLoader,
   },
-  data: () => ({
-    mess: "",
-    loading: true,
-  }),
+  data() {
+    return {
+      mess: "",
+      loading: true,
+      chatId: this.$route.params.id,
+    };
+  },
   computed: {
     ...mapGetters("currentChat", {
       usersInfo: "users",
@@ -92,11 +95,17 @@ export default {
     async sendMessage() {
       let message = this.mess.trim();
       if (message) {
+        let chatId = this.$route.params.id;
         let res = await this.$store.dispatch("currentChat/sendMessage", {
           content: message,
-          chatId: this.$route.params.id
+          chatId,
         });
+
         if (res) {
+          this.$socket.client.emit("createMessage", {
+            ...res,
+            chatId,
+          });
           this.mess = "";
         }
       }
@@ -111,10 +120,18 @@ export default {
     if (!this.$store.getters["user/user"]) {
       await this.$store.dispatch("user/load");
     }
-    let res = await this.$store.dispatch("currentChat/loadChat", this.$route.params.id);
-    if(res) {
+    let res = await this.$store.dispatch(
+      "currentChat/loadChat",
+      this.$route.params.id
+    );
+    if (res) {
       this.loading = false;
+      this.$socket.client.emit("joinToChat", this.$route.params.id);
     }
+  },
+  beforeDestroy() {
+    this.$store.dispatch("currentChat/clear");
+    this.$socket.client.emit("leftChat", this.chatId);
   },
 };
 </script>

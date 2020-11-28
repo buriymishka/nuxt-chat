@@ -60,11 +60,21 @@ export default {
     async formHandler() {
       if (this.$refs.form.validate()) {
         this.btnLoading = true;
-
+        let chatId = this.number
         let res = await this.$store.dispatch("userChats/join", {
           number: this.number,
           password: this.password,
         });
+        if (res.newUserMessage) {
+          this.$socket.client.emit("createMessage", {
+            ...res.newUserMessage,
+            chatId
+          });
+          this.$socket.client.emit("addUserToChat", {
+            ...res.newUser,
+            chatId
+          });
+        }
         if (!res) {
           this.btnLoading = false;
         }

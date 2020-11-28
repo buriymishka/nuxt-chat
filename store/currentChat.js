@@ -63,13 +63,27 @@ export const actions = {
     try {
       let res = await currentChatAPI.sendMessage(message)
       commit('addMessage', res)
-      return true
+      return res
     } catch (e) {
       dispatch('alerts/add', { text: e.message }, { root: true })
     }
   },
   clear({ commit }) {
     commit('clear')
+  },
+
+  socket_newMessage({ commit }, data) {
+    commit('addMessage', {
+      ownerId: data.ownerId,
+      content: data.content,
+    })
+  },
+
+  socket_addUserToCurrentChat({ commit }, data) {
+    commit('addUser', {
+      id: data.id,
+      name: data.name,
+    })
   }
   
 }
