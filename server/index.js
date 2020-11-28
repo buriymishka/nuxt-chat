@@ -1,22 +1,30 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser');
-const app = express()
-const db = require('./db')
+const consola = require('consola')
+const { Nuxt, Builder } = require('nuxt')
+const { app, server } = require('./app')
 
-const routerTokens = require('./routes/tokens.routes')
-const routerUsers = require('./routes/user.routes')
-const routerChats = require('./routes/chats.routes')
+let config = require('../nuxt.config.js')
+config.dev = !(process.env.NODE_ENV === 'production')
 
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({extended: true}))
-app.use(cookieParser());
+async function start() {
+  const nuxt = new Nuxt(config)
 
-app.use(routerTokens)
-app.use(routerUsers)
-app.use(routerChats)
+  const { host, port } = nuxt.options.server
 
-module.exports = {
-  // path: '/routes',
-  handler: app
+  if (config.dev) {
+    const builder = new Builder(nuxt)
+    await builder.build()
+  } else {
+    await nuxt.ready()
+  }
+
+  app.use(nuxt.render)
+
+  server.listen(port, () => {
+    consola.ready({
+      message: `Server listening on http://${host}:${port}`,
+      badge: true
+    })
+  })
 }
+start()
+

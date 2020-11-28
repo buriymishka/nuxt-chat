@@ -20,11 +20,11 @@ import AppUserChats from "@/components/cabinet/userChats";
 
 export default {
   layout: "main",
-  middleware: ['auth'],
+  middleware: ["auth"],
   components: {
     AppCreateChat,
     AppJoinChat,
-    AppUserChats
+    AppUserChats,
   },
   data: () => ({
     valid: true,

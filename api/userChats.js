@@ -5,8 +5,7 @@ export async function create(data) {
 }
 
 export async function update(data) {
-  await server.post('chats/update', data)
-  return {...data}
+  return await server.post('chats/update', data)
 }
 
 export async function join(data) {

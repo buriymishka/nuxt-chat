@@ -1,6 +1,6 @@
-import colors from 'vuetify/es5/util/colors'
+// const colors = require('vuetify/es5/util/colors')
 
-export default {
+module.exports = {
   // Global page headers (https://go.nuxtjs.dev/config-head)
   head: {
     titleTemplate: '%s - nuxt-chat',
@@ -22,7 +22,8 @@ export default {
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
-    { src: '@/plugins/dialog', ssr: false }
+    { src: '@/plugins/dialog', ssr: false },
+    { src: '@/plugins/sockets', ssr: false }
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -34,13 +35,14 @@ export default {
     '@nuxtjs/vuetify',
   ],
   serverMiddleware: [
-    '~/server/index.js'
+    // '~/server/index.js'
   ],
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
     // https://go.nuxtjs.dev/axios
     '@nuxtjs/axios',
   ],
+  telemetry: false,
 
   // Axios module configuration (https://go.nuxtjs.dev/config-axios)
   axios: {},
@@ -51,15 +53,15 @@ export default {
     theme: {
       dark: true,
       themes: {
-        dark: {
-          primary: colors.blue.darken2,
-          accent: colors.grey.darken3,
-          secondary: colors.amber.darken3,
-          info: colors.teal.lighten1,
-          warning: colors.amber.base,
-          error: colors.deepOrange.accent4,
-          success: colors.green.accent3
-        }
+        // dark: {
+        //   primary: colors.blue.darken2,
+        //   accent: colors.grey.darken3,
+        //   secondary: colors.amber.darken3,
+        //   info: colors.teal.lighten1,
+        //   warning: colors.amber.base,
+        //   error: colors.deepOrange.accent4,
+        //   success: colors.green.accent3
+        // }
       }
     }
   },
