@@ -34,6 +34,7 @@ export default {
     margin-left: auto
     background-color: #E0E0E0
     color: #212121
+    text-align: right
     .message__title
       color: #212121
   &.system
