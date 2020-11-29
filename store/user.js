@@ -40,6 +40,7 @@ export const actions = {
       this.$router.push('/cabinet')
       dispatch('alerts/add', { text: 'Successful sign in', color: 'green lighten-1' }, { root: true })
     } catch (e) {
+      console.log(e)
       dispatch('alerts/add', { text: e.message }, { root: true })
     }
   },
