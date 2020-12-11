@@ -18,14 +18,14 @@ module.exports.refresh = async (req, res) => {
           return
         }
 
-        res.json({ res: 1 })
+        res.json({ res: false })
         return
       }
 
-      res.json({ res: 2 })
+      res.json({ res: false })
       return
     } else {
-      res.json({ res: 3 })
+      res.json({ res: false })
     }
   } catch (e) {
     res.status(500).json(e)

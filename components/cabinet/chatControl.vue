@@ -47,6 +47,7 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
 import AppLoader from "@/components/loader";
 import mixinParser from "@/mixins/parser";
 
@@ -79,18 +80,19 @@ export default {
     btnLoading: false,
   }),
   computed: {
-    chatInfo() {
-      return this.$store.getters["userChats/editChat"];
-    },
+    ...mapGetters("userChats", {
+      chatInfo: "editChat",
+    }),
   },
   methods: {
+    ...mapActions("userChats", ["update", "clearEditChat", "loadById"]),
     async formHandler() {
       this.title = this.MixinParser(this.title);
       this.$nextTick(async () => {
         if (this.$refs.form.validate()) {
           this.btnLoading = true;
 
-          let res = await this.$store.dispatch("userChats/update", {
+          let res = await this.update({
             title: this.title,
             password: this.password,
             id: this.chatInfo.id,
@@ -104,12 +106,12 @@ export default {
       });
     },
     closeHandler() {
-      this.$store.dispatch("userChats/clearEditChat");
+      this.clearEditChat();
       this.$emit("close");
     },
   },
   async mounted() {
-    await this.$store.dispatch("userChats/loadById", this.id);
+    await this.loadById(this.id);
     this.title = this.chatInfo.title;
     this.loading = false;
   },

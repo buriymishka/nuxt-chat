@@ -29,31 +29,31 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
 import AppRecentChats from "@/components/cabinet/recentChats";
 import AppSnackbars from "@/components/snackbars";
-import AppChatInfo from "@/components/cabinet/chatInfo"
+import AppChatInfo from "@/components/cabinet/chatInfo";
 
 export default {
   components: {
     AppRecentChats,
     AppSnackbars,
-    AppChatInfo
+    AppChatInfo,
   },
   data: () => ({ drawer: null }),
   computed: {
-    userImage() {
-      return this.$store.getters["user/userImage"]
-    }
+    ...mapGetters("user", ["user", "userImage"]),
   },
   methods: {
+    ...mapActions("user", ["load", "logout"]),
     logoutHandler() {
-      this.$store.dispatch("user/logout")
-    }
+      this.logout();
+    },
   },
   mounted() {
-    if (!this.$store.getters["user/user"] && (this.$route.name !== 'cabinet-user')) {
-      this.$store.dispatch("user/load")
+    if (!this.user) {
+      this.load();
     }
-  }
+  },
 };
 </script>

@@ -6,7 +6,7 @@
         fluid
         ref="block"
         class="container"
-        v-else-if="$store.getters['user/user']"
+        v-else-if="user"
       >
         <div class="messages-wrapper" ref="block">
           <AppMessage
@@ -66,6 +66,7 @@ export default {
       usersInfo: "users",
       messagesInfo: "messages",
     }),
+    ...mapGetters("user", ["user"]),
     ownerName: function () {
       return (ownerId) => {
         return this.usersInfo.find((user) => user.id === ownerId).name;
@@ -73,7 +74,7 @@ export default {
     },
     isOwner: function () {
       return (ownerId) => {
-        return this.$store.getters["user/user"].id === ownerId;
+        return this.user.id === ownerId;
       };
     },
   },
@@ -117,7 +118,7 @@ export default {
     },
   },
   async mounted() {
-    if (!this.$store.getters["user/user"]) {
+    if (!this.user) {
       await this.$store.dispatch("user/load");
     }
     let res = await this.$store.dispatch(

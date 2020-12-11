@@ -2,7 +2,7 @@
   <v-layout align-center fill-height>
     <v-flex>
       <v-card max-width="600" class="mx-auto my-12">
-        <v-card-title>Sign in</v-card-title>
+        <v-card-title>Recover password</v-card-title>
         <v-card-text>
           <v-form
             @submit.prevent="formHandler"

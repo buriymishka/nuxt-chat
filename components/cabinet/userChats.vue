@@ -37,6 +37,7 @@
 </template>
 
 <script>
+import { mapGetters, mapActions } from "vuex";
 import AppLoader from "@/components/loader";
 import AppChatControl from "@/components/cabinet/chatControl";
 
@@ -51,17 +52,19 @@ export default {
     editTabChatId: null,
   }),
   computed: {
-    userChats() {
-      return this.$store.getters["userChats/chats"];
-    },
+    ...mapGetters("userChats", {
+      userChats: "chats",
+      chatsLoaded: "chatsLoaded",
+    }),
   },
   methods: {
+    ...mapActions("userChats", ["remove", "load"]),
     async deleteHandler(id) {
       const res = await this.$confirm("Do you really want to delete chat?", {
         title: "Warning",
       });
       if (res) {
-        this.$store.dispatch("userChats/remove", id);
+        this.remove(id);
       }
     },
     async editHandler(id) {
@@ -70,8 +73,8 @@ export default {
     },
   },
   async mounted() {
-    if (!this.$store.getters["userChats/chatsLoaded"]) {
-      await this.$store.dispatch("userChats/load");
+    if (!this.chatsLoaded) {
+      await this.load();
     }
     this.loading = false;
   },

@@ -60,6 +60,7 @@
   </v-container>
 </template>
 <script>
+import { mapGetters, mapActions } from "vuex";
 import mixinParser from "@/mixins/parser";
 export default {
   layout: "main",
@@ -84,26 +85,30 @@ export default {
       rePassword: "",
       show4: false,
       rePasswordRules: {},
-      userImage: "",
       image: null,
       btnLoading: false,
     };
   },
   computed: {
+    ...mapGetters("user", ["user", "userImage"]),
     comparePasswords() {
       return () => this.password === this.rePassword || "Password must match";
     },
   },
 
   methods: {
+    ...mapActions("user", ["update", "load"]),
     handleImageChange(file, fileList) {
       this.image = file;
     },
     setupForm() {
-      let { name, email } = this.$store.getters["user/user"];
+      let { name, email } = this.user;
       this.name = name;
       this.email = email;
-      this.userImage = this.$store.getters["user/userImage"];
+      this.password = "";
+      this.rePassword = "";
+      this.image = null;
+      this.$refs.upload.reset()
     },
     async formHandler() {
       this.name = this.MixinParser(this.name);
@@ -118,7 +123,7 @@ export default {
             newPassword: this.password,
           };
 
-          let res = await this.$store.dispatch("user/update", formData);
+          let res = await this.update(formData);
           if (res) {
             this.setupForm();
           }
@@ -128,8 +133,8 @@ export default {
     },
   },
   async mounted() {
-    if (!this.$store.getters["user/user"]) {
-      await this.$store.dispatch("user/load");
+    if (!this.user) {
+      await this.load();
     }
     this.setupForm();
   },
