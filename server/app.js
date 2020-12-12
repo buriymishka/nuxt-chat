@@ -2,7 +2,6 @@ const app = require('express')()
 const server = require('http').createServer(app)
 const io = require('socket.io')(server)
 
-
 const bodyParser = require('body-parser')
 const cookieParser = require('cookie-parser');
 const db = require('./db')
@@ -10,6 +9,14 @@ const db = require('./db')
 const routerTokens = require('./routes/tokens.routes')
 const routerUsers = require('./routes/user.routes')
 const routerChats = require('./routes/chats.routes')
+
+app.use((req, res, next) => {
+  if (req.header('x-forwarded-proto') !== 'https') {
+    res.redirect(`https://${req.header('host')}${req.url}`)
+  } else {
+    next();
+  }
+});
 
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))

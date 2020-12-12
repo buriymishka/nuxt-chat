@@ -2,7 +2,7 @@ import { getAC, setAC } from '@/tokens/index'
 import axios from 'axios'
 
 const instance = axios.create({
-  baseURL: 'http://localhost:3000/api/',   // 
+  baseURL: 'http://localhost:3000/api/',   // https://mihail-nuxt-chat.herokuapp.com/api/
   withCredentials: true
 })
 
