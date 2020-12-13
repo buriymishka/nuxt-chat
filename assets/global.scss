@@ -18,6 +18,10 @@ body {
   overflow: hidden !important
 }
 
+.pointer {
+  cursor: pointer !important
+}
+
 .fade-enter-active {
   animation: fadeIn .2s;
 }

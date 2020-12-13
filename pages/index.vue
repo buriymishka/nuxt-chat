@@ -1,6 +1,17 @@
 <template>
   <v-layout align-center fill-height>
     <v-flex>
+      <div class="text-center">
+        <a
+          href="https://docs.google.com/document/d/1S5S4CsrBvERFyGrEy6iLEJCrbURyV8MfrRG-OoYHzBI/edit?usp=sharing"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <v-chip large class="ma-4 pointer" color="green" text-color="white">
+            How does it works
+          </v-chip>
+        </a>
+      </div>
       <v-card max-width="600" class="mx-auto my-12">
         <v-card-title>Sign in</v-card-title>
         <v-card-text>
