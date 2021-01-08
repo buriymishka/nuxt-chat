@@ -1,3 +1,5 @@
+![GitHub Logo](https://mihail-react-paint.herokuapp.com/static/media/preview.aed74de5.gif)
+
 # nuxt-chat
 
 ## Build Setup
